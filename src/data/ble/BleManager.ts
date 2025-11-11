@@ -37,6 +37,7 @@ import {
   MTU_SIZE,
   POSITION_SPIKE_THRESHOLD,
 } from './types';
+import { WorkoutParameters } from '../../domain/models/Models';
 
 /**
  * Main BLE Manager class for Vitruvian device communication
@@ -243,6 +244,58 @@ export class VitruvianBleManager extends EventEmitter {
   }
 
   /**
+   * Connect to a device by ID
+   */
+  async connectToDevice(deviceId: string): Promise<void> {
+    try {
+      this.log(`Connecting to device ID: ${deviceId}`);
+      this.updateConnectionState({
+        status: ConnectionStatus.Connecting,
+        deviceName: 'Unknown',
+      });
+
+      // Connect to device using BLE manager
+      this.device = await this.bleManager.connectToDevice(deviceId, {
+        timeout: BLE_CONSTANTS.CONNECTION_TIMEOUT_MS,
+      });
+
+      this.currentDeviceName = this.device.name;
+      this.currentDeviceAddress = this.device.id;
+
+      this.log('Connected! Discovering services...');
+
+      // Discover all services and characteristics
+      await this.device.discoverAllServicesAndCharacteristics();
+
+      this.log('Services discovered! Setting up characteristics...');
+
+      // Setup characteristics
+      await this.setupCharacteristics();
+
+      // Request MTU for large frame transfers (96-byte program params)
+      await this.requestMtu(MTU_SIZE);
+
+      // Enable notifications on all required characteristics
+      await this.enableNotifications();
+
+      // Update connection state to Ready
+      this.updateConnectionState({
+        status: ConnectionStatus.Ready,
+        deviceName: this.currentDeviceName || 'Unknown',
+        deviceAddress: this.currentDeviceAddress || 'Unknown',
+      });
+
+      this.log('Device ready! Starting keep-alive property polling...');
+
+      // Start property polling immediately (keep-alive mechanism)
+      this.startPropertyPolling();
+    } catch (error) {
+      this.logError('Failed to connect', error as Error);
+      throw error;
+    }
+  }
+
+  /**
    * Connect to a device
    */
   async connect(device: Device): Promise<void> {
@@ -340,7 +393,7 @@ export class VitruvianBleManager extends EventEmitter {
     }
 
     // Get NUS service
-    const nusService = await this.device.servicesForDevice();
+    const nusService = await this.device.services();
     const nusServiceFound = nusService.find((s) => s.uuid.toLowerCase() === BLE_CONSTANTS.NUS_SERVICE_UUID.toLowerCase());
 
     if (!nusServiceFound) {
@@ -350,7 +403,7 @@ export class VitruvianBleManager extends EventEmitter {
     this.log('NUS service found, getting characteristics...');
 
     // Get all characteristics for NUS service
-    const characteristics = await this.device.characteristicsForDevice(BLE_CONSTANTS.NUS_SERVICE_UUID);
+    const characteristics = await this.device.characteristicsForService(BLE_CONSTANTS.NUS_SERVICE_UUID);
 
     // Log all discovered characteristics
     this.log('=== Discovered Characteristics ===');
@@ -379,9 +432,9 @@ export class VitruvianBleManager extends EventEmitter {
     // If rep notify not found in NUS service, search all services
     if (!this.repNotifyCharacteristic) {
       this.log('Rep notify characteristic not found in NUS service, searching all services...');
-      const allServices = await this.device.servicesForDevice();
+      const allServices = await this.device.services();
       for (const service of allServices) {
-        const chars = await this.device.characteristicsForDevice(service.uuid);
+        const chars = await this.device.characteristicsForService(service.uuid);
         const found = chars.find(
           (c) => c.uuid.toLowerCase() === BLE_CONSTANTS.REP_NOTIFY_CHAR_UUID.toLowerCase()
         );
@@ -407,9 +460,9 @@ export class VitruvianBleManager extends EventEmitter {
     }
 
     // Collect workout command characteristics
-    const allServices = await this.device.servicesForDevice();
+    const allServices = await this.device.services();
     for (const service of allServices) {
-      const chars = await this.device.characteristicsForDevice(service.uuid);
+      const chars = await this.device.characteristicsForService(service.uuid);
       for (const uuid of BLE_CONSTANTS.WORKOUT_CMD_CHAR_UUIDS) {
         const found = chars.find((c) => c.uuid.toLowerCase() === uuid.toLowerCase());
         if (found) {
@@ -450,11 +503,11 @@ export class VitruvianBleManager extends EventEmitter {
     this.log('Enabling notifications on all required characteristics...');
 
     // Get all characteristics from all services
-    const allServices = await this.device.servicesForDevice();
+    const allServices = await this.device.services();
     const notifyCharacteristics: Characteristic[] = [];
 
     for (const service of allServices) {
-      const chars = await this.device.characteristicsForDevice(service.uuid);
+      const chars = await this.device.characteristicsForService(service.uuid);
       for (const uuid of BLE_CONSTANTS.NOTIFY_CHAR_UUIDS) {
         const found = chars.find((c) => c.uuid.toLowerCase() === uuid.toLowerCase());
         if (found && found.isNotifiable) {
@@ -604,6 +657,73 @@ export class VitruvianBleManager extends EventEmitter {
   enableJustLiftWaitingMode(): void {
     this.log('Enabling Just Lift waiting mode - position hysteresis with velocity confirmation (vel>100)');
     this.updateHandleState(HandleState.Released);
+  }
+
+  /**
+   * Start scanning for devices
+   * Wrapper for scanForDevices that doesn't return a promise
+   */
+  async startScanning(): Promise<void> {
+    this.log('Starting device scan...');
+    this.updateConnectionState({ status: ConnectionStatus.Scanning });
+
+    this.bleManager.startDeviceScan(null, null, (error, device) => {
+      if (error) {
+        this.logError('Scan error', error);
+        return;
+      }
+
+      if (device && device.name && device.name.startsWith(BLE_CONSTANTS.DEVICE_NAME_PREFIX)) {
+        this.log(`Found Vitruvian device: ${device.name} (${device.id})`);
+        this.emit('deviceScanned', {
+          name: device.name,
+          address: device.id,
+          rssi: device.rssi || 0,
+        });
+      }
+    });
+  }
+
+  /**
+   * Stop scanning for devices
+   */
+  async stopScanning(): Promise<void> {
+    this.log('Stopping device scan...');
+    await this.bleManager.stopDeviceScan();
+  }
+
+  /**
+   * Enable handle detection for Just Lift mode
+   * Starts monitoring handle state and enables auto-start when handles are grabbed
+   */
+  enableHandleDetection(): void {
+    this.log('Handle detection enabled - monitoring for handle grab');
+    this.updateHandleState(HandleState.Released);
+  }
+
+  /**
+   * Start workout with given parameters
+   * Sends workout command to device
+   */
+  async startWorkout(params: WorkoutParameters): Promise<void> {
+    this.log('Starting workout...');
+
+    // TODO: Implement protocol frame generation and sending
+    // For now, just start monitor polling
+    this.startMonitorPolling();
+  }
+
+  /**
+   * Stop workout
+   * Stops monitor polling and sends stop command to device
+   */
+  async stopWorkout(): Promise<void> {
+    this.log('Stopping workout...');
+
+    // Stop monitor polling
+    this.stopPolling();
+
+    // TODO: Implement stop command protocol frame
   }
 
   /**

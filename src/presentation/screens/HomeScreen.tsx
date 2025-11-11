@@ -106,7 +106,8 @@ export const HomeScreen: React.FC = () => {
    */
   const handleWorkoutModePress = useCallback(
     (route: keyof RootStackParamList) => {
-      navigation.navigate(route);
+      // Type assertion needed since we know these routes don't require params
+      navigation.navigate(route as any);
     },
     [navigation]
   );

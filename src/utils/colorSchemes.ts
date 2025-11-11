@@ -3,7 +3,8 @@
  * Migrated from Android Kotlin ColorSchemes object
  */
 
-export { ColorScheme, ColorSchemes, RGBColor } from './protocolBuilder';
+export type { ColorScheme, RGBColor } from './protocolBuilder';
+export { ColorSchemes } from './protocolBuilder';
 
 // Re-export the ALL array as COLOR_SCHEMES for easier access
 import { ColorSchemes } from './protocolBuilder';

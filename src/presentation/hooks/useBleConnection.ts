@@ -6,7 +6,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { create } from 'zustand';
 import { VitruvianBleManager } from '../../data/ble/BleManager';
-import { ConnectionState, HandleState, WorkoutMetric, RepNotification } from '../../domain/models/Models';
+import { HandleState, WorkoutMetric, ConnectionState as DomainConnectionState } from '../../domain/models/Models';
+import { ConnectionState as BleConnectionState, RepNotification, ConnectionStatus } from '../../data/ble/types';
 
 interface ScannedDevice {
   name: string;
@@ -14,9 +15,35 @@ interface ScannedDevice {
   rssi: number;
 }
 
-interface BleConnectionState {
+/**
+ * Convert BLE layer ConnectionState (status property) to domain layer ConnectionState (type property)
+ */
+function convertBleConnectionStateToDomain(bleState: BleConnectionState): DomainConnectionState {
+  switch (bleState.status) {
+    case ConnectionStatus.Disconnected:
+      return { type: 'disconnected' };
+    case ConnectionStatus.Scanning:
+      return { type: 'scanning' };
+    case ConnectionStatus.Connecting:
+      return { type: 'connecting' };
+    case ConnectionStatus.Ready:
+      return {
+        type: 'connected',
+        deviceName: bleState.deviceName,
+        deviceAddress: bleState.deviceAddress,
+      };
+    case ConnectionStatus.Error:
+      return {
+        type: 'error',
+        message: bleState.message,
+        throwable: bleState.error,
+      };
+  }
+}
+
+interface BleHookConnectionState {
   // State
-  connectionState: ConnectionState;
+  connectionState: DomainConnectionState;
   scannedDevices: ScannedDevice[];
   currentMetric: WorkoutMetric | null;
   handleState: HandleState;
@@ -26,7 +53,7 @@ interface BleConnectionState {
   connectionLostDuringWorkout: boolean;
 
   // Actions
-  setConnectionState: (state: ConnectionState) => void;
+  setConnectionState: (state: DomainConnectionState) => void;
   setScannedDevices: (devices: ScannedDevice[]) => void;
   addScannedDevice: (device: ScannedDevice) => void;
   setCurrentMetric: (metric: WorkoutMetric | null) => void;
@@ -39,7 +66,7 @@ interface BleConnectionState {
   reset: () => void;
 }
 
-const useBleConnectionStore = create<BleConnectionState>((set) => ({
+const useBleConnectionStore = create<BleHookConnectionState>((set) => ({
   // Initial state
   connectionState: { type: 'disconnected' },
   scannedDevices: [],
@@ -106,8 +133,10 @@ export const useBleConnection = () => {
         await bleManager.initialize();
 
         // Set up event listeners
-        bleManager.on('connectionStateChanged', (state: ConnectionState) => {
-          store.setConnectionState(state);
+        bleManager.on('connectionStateChange', (state: BleConnectionState) => {
+          // Convert BLE layer state to domain layer state
+          const domainState = convertBleConnectionStateToDomain(state);
+          store.setConnectionState(domainState);
         });
 
         bleManager.on('deviceScanned', (device: ScannedDevice) => {
@@ -118,7 +147,7 @@ export const useBleConnection = () => {
           store.setCurrentMetric(metric);
         });
 
-        bleManager.on('handleStateChanged', (state: HandleState) => {
+        bleManager.on('handleStateChange', (state: HandleState) => {
           store.setHandleState(state);
         });
 
@@ -166,7 +195,7 @@ export const useBleConnection = () => {
     async (deviceAddress: string) => {
       try {
         store.setConnectionError(null);
-        await bleManager.connect(deviceAddress);
+        await bleManager.connectToDevice(deviceAddress);
       } catch (error) {
         console.error('Failed to connect to device:', error);
         store.setConnectionError(error instanceof Error ? error.message : 'Connection failed');
@@ -198,6 +227,8 @@ export const useBleConnection = () => {
 
         // Wait for first device with timeout
         return await new Promise((resolve) => {
+          let previousDeviceCount = 0;
+
           const timeout = setTimeout(() => {
             stopScanning();
             store.setIsAutoConnecting(false);
@@ -206,9 +237,10 @@ export const useBleConnection = () => {
           }, timeoutMs);
 
           const unsubscribe = useBleConnectionStore.subscribe(
-            (state) => state.scannedDevices,
-            async (devices) => {
-              if (devices.length > 0) {
+            async (state) => {
+              const devices = state.scannedDevices;
+              if (devices.length > 0 && devices.length !== previousDeviceCount) {
+                previousDeviceCount = devices.length;
                 clearTimeout(timeout);
                 await stopScanning();
 

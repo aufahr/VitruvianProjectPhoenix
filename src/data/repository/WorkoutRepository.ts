@@ -217,7 +217,7 @@ class WorkoutRepositoryImpl extends EventEmitter implements IWorkoutRepository {
   async saveRoutine(routine: Routine): Promise<void> {
     try {
       const entity = this.routineToEntity(routine);
-      const exerciseEntities = routine.exercises.map((ex) => this.routineExerciseToEntity(ex, routine.id));
+      const exerciseEntities = (routine.exercises || []).map((ex) => this.routineExerciseToEntity(ex, routine.id));
 
       await WorkoutDao.insertRoutineWithExercises(entity, exerciseEntities);
       console.log(`[WorkoutRepository] Saved routine: ${routine.name}`);
@@ -233,7 +233,7 @@ class WorkoutRepositoryImpl extends EventEmitter implements IWorkoutRepository {
   async updateRoutine(routine: Routine): Promise<void> {
     try {
       const entity = this.routineToEntity(routine);
-      const exerciseEntities = routine.exercises.map((ex) => this.routineExerciseToEntity(ex, routine.id));
+      const exerciseEntities = (routine.exercises || []).map((ex) => this.routineExerciseToEntity(ex, routine.id));
 
       await WorkoutDao.updateRoutineWithExercises(entity, exerciseEntities);
       console.log(`[WorkoutRepository] Updated routine: ${routine.name}`);
@@ -463,10 +463,10 @@ class WorkoutRepositoryImpl extends EventEmitter implements IWorkoutRepository {
     return {
       id: routine.id,
       name: routine.name,
-      description: routine.description,
-      createdAt: routine.createdAt,
-      lastUsed: routine.lastUsed,
-      useCount: routine.useCount,
+      description: routine.description || '',
+      createdAt: routine.createdAt || Date.now(),
+      lastUsed: routine.lastUsed || null,
+      useCount: routine.useCount || 0,
     };
   }
 
@@ -479,11 +479,11 @@ class WorkoutRepositoryImpl extends EventEmitter implements IWorkoutRepository {
     let eccentricLoad = 100;
     let echoLevel = 1;
 
-    if (exercise.workoutType.type === 'echo') {
+    if (exercise.workoutType && exercise.workoutType.type === 'echo') {
       mode = 'Echo';
       eccentricLoad = exercise.workoutType.eccentricLoad;
       echoLevel = exercise.workoutType.level;
-    } else if (exercise.workoutType.type === 'program') {
+    } else if (exercise.workoutType && exercise.workoutType.type === 'program') {
       mode = exercise.workoutType.mode.displayName.replace(/\s+/g, '');
     }
 
@@ -492,21 +492,21 @@ class WorkoutRepositoryImpl extends EventEmitter implements IWorkoutRepository {
       routineId,
       exerciseName: exercise.exercise.name,
       exerciseMuscleGroup: exercise.exercise.muscleGroup,
-      exerciseEquipment: exercise.exercise.equipment,
-      exerciseDefaultCableConfig: exercise.exercise.defaultCableConfig,
-      exerciseId: exercise.exercise.id,
-      cableConfig: exercise.cableConfig,
+      exerciseEquipment: exercise.exercise.equipment || '',
+      exerciseDefaultCableConfig: exercise.exercise.defaultCableConfig || 'DOUBLE',
+      exerciseId: exercise.exercise.id || null,
+      cableConfig: exercise.cableConfig || 'DOUBLE',
       orderIndex: exercise.orderIndex,
-      setReps: exercise.setReps.join(','),
+      setReps: (exercise.setReps || []).join(','),
       weightPerCableKg: exercise.weightPerCableKg,
-      setWeights: exercise.setWeightsPerCableKg.join(','),
+      setWeights: (exercise.setWeightsPerCableKg || []).join(','),
       mode,
       eccentricLoad,
       echoLevel,
-      progressionKg: exercise.progressionKg,
-      restSeconds: exercise.restSeconds,
-      notes: exercise.notes,
-      duration: exercise.duration,
+      progressionKg: exercise.progressionKg || 0,
+      restSeconds: exercise.restSeconds || 60,
+      notes: exercise.notes || '',
+      duration: exercise.duration || null,
     };
   }
 
@@ -616,6 +616,5 @@ export const resetWorkoutRepository = (): void => {
   workoutRepositoryInstance = null;
 };
 
-// Export types
-export type { IWorkoutRepository };
+// Export implementation
 export { WorkoutRepositoryImpl };

@@ -10,8 +10,8 @@ import {
   getAllRoutines,
   getRoutineById,
   insertRoutine,
-  updateRoutineEntity,
-  deleteRoutine as deleteRoutineDao,
+  updateRoutineWithExercises,
+  deleteRoutineComplete,
   markRoutineUsed,
 } from '../../data/local/daos/workoutDao';
 import { generateUUID } from '../../domain/models/Models';
@@ -91,14 +91,20 @@ export const useRoutines = () => {
     async (routine: Routine) => {
       try {
         store.setError(null);
-        const routineToSave = {
-          ...routine,
+
+        // Convert Routine to RoutineEntity
+        const routineEntity = {
           id: routine.id || generateUUID(),
+          name: routine.name,
+          description: routine.description || '',
           createdAt: routine.createdAt || Date.now(),
+          lastUsed: routine.lastUsed ?? null,
+          useCount: routine.useCount || 0,
         };
-        await insertRoutine(routineToSave);
+
+        await insertRoutine(routineEntity);
         await loadRoutines();
-        console.log(`Routine saved: ${routineToSave.name}`);
+        console.log(`Routine saved: ${routine.name}`);
       } catch (err) {
         console.error('Failed to save routine:', err);
         store.setError(err instanceof Error ? err.message : 'Failed to save routine');
@@ -113,7 +119,43 @@ export const useRoutines = () => {
     async (routine: Routine) => {
       try {
         store.setError(null);
-        await updateRoutineEntity(routine);
+
+        // Convert Routine to RoutineEntity
+        const routineEntity = {
+          id: routine.id,
+          name: routine.name,
+          description: routine.description || '',
+          createdAt: routine.createdAt || Date.now(),
+          lastUsed: routine.lastUsed ?? null,
+          useCount: routine.useCount || 0,
+        };
+
+        // Convert RoutineExercises to RoutineExerciseEntities
+        const exerciseEntities = (routine.exercises || []).map((ex, index) => ({
+          id: ex.id,
+          routineId: routine.id,
+          exerciseName: ex.exercise.name,
+          exerciseMuscleGroup: ex.exercise.muscleGroup,
+          exerciseEquipment: ex.exercise.equipment || '',
+          exerciseDefaultCableConfig: ex.exercise.defaultCableConfig || 'DOUBLE',
+          exerciseId: ex.exercise.id || null,
+          cableConfig: ex.cableConfig || 'DOUBLE',
+          orderIndex: ex.orderIndex,
+          setReps: (ex.setReps || []).join(','),
+          weightPerCableKg: ex.weightPerCableKg,
+          setWeights: (ex.setWeightsPerCableKg || []).join(','),
+          mode: ex.workoutType?.type === 'echo' ? 'Echo' :
+                ex.workoutType?.type === 'program' ? ex.workoutType.mode.displayName.replace(/\s+/g, '') :
+                'OldSchool',
+          eccentricLoad: ex.workoutType?.type === 'echo' ? ex.workoutType.eccentricLoad : (ex.eccentricLoad || 100),
+          echoLevel: ex.workoutType?.type === 'echo' ? ex.workoutType.level : (ex.echoLevel || 1),
+          progressionKg: ex.progressionKg || 0,
+          restSeconds: ex.restSeconds || 60,
+          notes: ex.notes || '',
+          duration: ex.duration ?? null,
+        }));
+
+        await updateRoutineWithExercises(routineEntity, exerciseEntities);
         await loadRoutines();
         console.log(`Routine updated: ${routine.name}`);
       } catch (err) {
@@ -130,7 +172,7 @@ export const useRoutines = () => {
     async (routineId: string) => {
       try {
         store.setError(null);
-        await deleteRoutineDao(routineId);
+        await deleteRoutineComplete(routineId);
         await loadRoutines();
         console.log(`Routine deleted: ${routineId}`);
       } catch (err) {

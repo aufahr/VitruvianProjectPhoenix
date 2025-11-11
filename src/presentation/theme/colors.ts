@@ -89,6 +89,8 @@ export const DarkColorScheme = {
 
   error: ErrorRed,
   onError: TextPrimary,
+  errorContainer: hexToRgba(ErrorRed, 0.2),
+  onErrorContainer: ErrorRed,
 
   outline: TextTertiary,
   outlineVariant: TextDisabled,
@@ -129,6 +131,8 @@ export const LightColorScheme = {
 
   error: ErrorRed,
   onError: ColorLightSurface,                 // White text on red error
+  errorContainer: hexToRgba(ErrorRed, 0.1),
+  onErrorContainer: ErrorRed,
 
   outline: hexToRgba(ColorOnLightSurfaceVariant, 0.6),
   outlineVariant: hexToRgba(ColorOnLightSurfaceVariant, 0.4),

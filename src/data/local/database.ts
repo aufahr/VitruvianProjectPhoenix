@@ -16,6 +16,7 @@
  */
 
 import SQLite from 'react-native-sqlite-storage';
+import type { Database, Transaction, ResultSet } from 'react-native-sqlite-storage';
 
 // Enable promise-based API
 SQLite.enablePromise(true);
@@ -23,12 +24,12 @@ SQLite.enablePromise(true);
 const DATABASE_NAME = 'workout_database.db';
 const DATABASE_VERSION = 15;
 
-let databaseInstance: SQLite.SQLiteDatabase | null = null;
+let databaseInstance: Database | null = null;
 
 /**
  * Get or create database instance
  */
-export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
+export const getDatabase = async (): Promise<Database> => {
   if (databaseInstance) {
     return databaseInstance;
   }
@@ -52,7 +53,7 @@ export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 /**
  * Initialize database schema and handle migrations
  */
-const initializeDatabase = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+const initializeDatabase = async (db: Database): Promise<void> => {
   try {
     // Get current database version
     const currentVersion = await getDatabaseVersion(db);
@@ -75,7 +76,7 @@ const initializeDatabase = async (db: SQLite.SQLiteDatabase): Promise<void> => {
 /**
  * Create all database tables
  */
-const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+const createTables = async (db: Database): Promise<void> => {
   const tables = [
     // Workout sessions table
     `CREATE TABLE IF NOT EXISTS workout_sessions (
@@ -231,7 +232,7 @@ const createTables = async (db: SQLite.SQLiteDatabase): Promise<void> => {
 /**
  * Create database indexes for better query performance
  */
-const createIndexes = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+const createIndexes = async (db: Database): Promise<void> => {
   const indexes = [
     'CREATE INDEX IF NOT EXISTS idx_workout_metrics_sessionId ON workout_metrics(sessionId)',
     'CREATE INDEX IF NOT EXISTS idx_routine_exercises_routineId ON routine_exercises(routineId)',
@@ -249,7 +250,7 @@ const createIndexes = async (db: SQLite.SQLiteDatabase): Promise<void> => {
 /**
  * Get current database version
  */
-const getDatabaseVersion = async (db: SQLite.SQLiteDatabase): Promise<number> => {
+const getDatabaseVersion = async (db: Database): Promise<number> => {
   try {
     const result = await db.executeSql('PRAGMA user_version');
     return result[0].rows.item(0).user_version;
@@ -263,7 +264,7 @@ const getDatabaseVersion = async (db: SQLite.SQLiteDatabase): Promise<number> =>
  * Set database version
  */
 const setDatabaseVersion = async (
-  db: SQLite.SQLiteDatabase,
+  db: Database,
   version: number
 ): Promise<void> => {
   await db.executeSql(`PRAGMA user_version = ${version}`);
@@ -273,7 +274,7 @@ const setDatabaseVersion = async (
  * Perform database migrations from old version to new version
  */
 const performMigrations = async (
-  db: SQLite.SQLiteDatabase,
+  db: Database,
   fromVersion: number,
   toVersion: number
 ): Promise<void> => {
@@ -364,7 +365,7 @@ export const deleteDatabase = async (): Promise<void> => {
 export const executeSql = async (
   sql: string,
   params: any[] = []
-): Promise<SQLite.ResultSet[]> => {
+): Promise<[ResultSet]> => {
   const db = await getDatabase();
   return db.executeSql(sql, params);
 };
@@ -373,13 +374,13 @@ export const executeSql = async (
  * Execute multiple SQL statements in a transaction
  */
 export const executeTransaction = async (
-  callback: (tx: SQLite.Transaction) => void
+  callback: (tx: Transaction) => void
 ): Promise<void> => {
   const db = await getDatabase();
   return new Promise((resolve, reject) => {
     db.transaction(
       callback,
-      (error) => reject(error),
+      (error: any) => reject(error),
       () => resolve()
     );
   });

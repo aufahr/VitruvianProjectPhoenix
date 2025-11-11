@@ -90,7 +90,7 @@ export const SingleExerciseScreen: React.FC<SingleExerciseScreenProps> = ({
     useWorkoutSession();
 
   // BLE connection hook
-  const {connectionState, connect, disconnect} = useBleConnection();
+  const {connectionState, connectToDevice, autoConnect, disconnect} = useBleConnection();
 
   // Local state
   const [showExercisePicker, setShowExercisePicker] = useState(true);
@@ -147,8 +147,8 @@ export const SingleExerciseScreen: React.FC<SingleExerciseScreenProps> = ({
 
       // Check if already connected
       if (connectionState.type !== 'connected') {
-        // Attempt to connect
-        const connected = await connect();
+        // Attempt to connect with 30 second timeout
+        const connected = await autoConnect(30000);
         if (!connected) {
           setConnectionError('Failed to connect to device');
           setIsConnecting(false);

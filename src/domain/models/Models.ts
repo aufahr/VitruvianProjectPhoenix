@@ -12,12 +12,9 @@ export interface PersonalRecord {
 
 /**
  * Handle state - workout handle grab detection
+ * Re-exported from BLE types for convenience
  */
-export enum HandleState {
-  Released = 'released',
-  Grabbed = 'grabbed',
-  Moving = 'moving',
-}
+export { HandleState } from '../../data/ble/types';
 
 /**
  * Connection state - BLE connection states

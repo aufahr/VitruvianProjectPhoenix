@@ -43,13 +43,11 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <Card
       onPress={onPress}
-      style={[
-        {
-          borderWidth: 1,
-          borderColor: colors.surfaceVariant,
-        },
-        style,
-      ]}
+      style={{
+        borderWidth: 1,
+        borderColor: colors.surfaceVariant,
+        ...style,
+      }}
       elevation={2}
       testID={testID}>
       <View

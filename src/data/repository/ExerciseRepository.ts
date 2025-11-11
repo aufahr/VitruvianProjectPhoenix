@@ -194,6 +194,5 @@ export const resetExerciseRepository = (): void => {
   exerciseRepositoryInstance = null;
 };
 
-// Export types
-export type { IExerciseRepository };
+// Export implementation
 export { ExerciseRepositoryImpl };

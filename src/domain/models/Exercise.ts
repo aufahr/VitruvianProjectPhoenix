@@ -51,6 +51,15 @@ export const createDefaultExercise = (overrides?: Partial<Exercise>): Exercise =
 });
 
 /**
+ * Helper function to determine the appropriate cable configuration for an exercise
+ * If exercise allows EITHER, defaults to DOUBLE
+ */
+export const resolveDefaultCableConfig = (exercise: Exercise): CableConfiguration => {
+  const defaultConfig = exercise.defaultCableConfig ?? CableConfiguration.DOUBLE;
+  return defaultConfig === CableConfiguration.EITHER ? CableConfiguration.DOUBLE : defaultConfig;
+};
+
+/**
  * Exercise categories for organization
  * Used primarily for filtering and grouping in the UI
  */

@@ -161,7 +161,7 @@ export const DailyRoutinesScreen: React.FC = () => {
         if (routine.exercises && routine.exercises.length > 0) {
           const firstExercise = routine.exercises[0];
           updateWorkoutParameters({
-            workoutType: firstExercise.workoutType ?? {type: 'program', mode: {displayName: 'OldSchool', value: 0}},
+            workoutType: firstExercise.workoutType ?? {type: 'program', mode: {modeValue: 0, displayName: 'Old School'}},
             reps: firstExercise.setReps?.[0] ?? 10,
             weightPerCableKg: firstExercise.weightPerCableKg ?? 10,
             progressionRegressionKg: firstExercise.progressionKg ?? 0,
@@ -190,7 +190,7 @@ export const DailyRoutinesScreen: React.FC = () => {
           if (routine.exercises && routine.exercises.length > 0) {
             const firstExercise = routine.exercises[0];
             updateWorkoutParameters({
-              workoutType: firstExercise.workoutType ?? {type: 'program', mode: {displayName: 'OldSchool', value: 0}},
+              workoutType: firstExercise.workoutType ?? {type: 'program', mode: {modeValue: 0, displayName: 'Old School'}},
               reps: firstExercise.setReps?.[0] ?? 10,
               weightPerCableKg: firstExercise.weightPerCableKg ?? 10,
               progressionRegressionKg: firstExercise.progressionKg ?? 0,

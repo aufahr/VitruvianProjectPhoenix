@@ -23,7 +23,7 @@ export interface ModalProps {
   visible: boolean;
   onDismiss: () => void;
   title?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   variant?: 'center' | 'bottom' | 'fullscreen';
   showCloseButton?: boolean;
   dismissOnBackdropPress?: boolean;

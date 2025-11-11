@@ -739,7 +739,7 @@ const NumberPicker: React.FC<NumberPickerProps> = ({
 
         <Text
           style={[
-            typography.displaySmall,
+            typography.displayMedium,
             { color: colors.onSurface, fontWeight: 'bold' },
           ]}>
           {value} {suffix}

@@ -20,12 +20,12 @@ const hapticOptions: HapticOptions = {
  * Haptic pattern configurations for different events
  */
 const HAPTIC_PATTERNS: Record<HapticEvent, HapticFeedbackTypes> = {
-  [HapticEvent.REP_COMPLETED]: 'impactLight',
-  [HapticEvent.WARMUP_COMPLETE]: 'impactMedium',
-  [HapticEvent.WORKOUT_COMPLETE]: 'notificationSuccess',
-  [HapticEvent.WORKOUT_START]: 'impactMedium',
-  [HapticEvent.WORKOUT_END]: 'impactMedium',
-  [HapticEvent.ERROR]: 'notificationError',
+  [HapticEvent.REP_COMPLETED]: HapticFeedbackTypes.impactLight,
+  [HapticEvent.WARMUP_COMPLETE]: HapticFeedbackTypes.impactMedium,
+  [HapticEvent.WORKOUT_COMPLETE]: HapticFeedbackTypes.notificationSuccess,
+  [HapticEvent.WORKOUT_START]: HapticFeedbackTypes.impactMedium,
+  [HapticEvent.WORKOUT_END]: HapticFeedbackTypes.impactMedium,
+  [HapticEvent.ERROR]: HapticFeedbackTypes.notificationError,
 };
 
 /**
@@ -53,37 +53,37 @@ export const useHapticFeedback = () => {
 
   // Trigger light impact (rep completed)
   const triggerLight = useCallback(() => {
-    ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactLight, hapticOptions);
   }, []);
 
   // Trigger medium impact (warmup complete, workout start/end)
   const triggerMedium = useCallback(() => {
-    ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactMedium, hapticOptions);
   }, []);
 
   // Trigger heavy impact
   const triggerHeavy = useCallback(() => {
-    ReactNativeHapticFeedback.trigger('impactHeavy', hapticOptions);
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.impactHeavy, hapticOptions);
   }, []);
 
   // Trigger success notification (workout complete, new PR)
   const triggerSuccess = useCallback(() => {
-    ReactNativeHapticFeedback.trigger('notificationSuccess', hapticOptions);
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.notificationSuccess, hapticOptions);
   }, []);
 
   // Trigger warning notification
   const triggerWarning = useCallback(() => {
-    ReactNativeHapticFeedback.trigger('notificationWarning', hapticOptions);
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.notificationWarning, hapticOptions);
   }, []);
 
   // Trigger error notification (connection lost, workout error)
   const triggerError = useCallback(() => {
-    ReactNativeHapticFeedback.trigger('notificationError', hapticOptions);
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.notificationError, hapticOptions);
   }, []);
 
   // Trigger selection (button tap, selection change)
   const triggerSelection = useCallback(() => {
-    ReactNativeHapticFeedback.trigger('selection', hapticOptions);
+    ReactNativeHapticFeedback.trigger(HapticFeedbackTypes.selection, hapticOptions);
   }, []);
 
   return {

@@ -15,7 +15,7 @@ import {
   BLE_CONSTANTS,
 } from '../ble/types';
 import { WorkoutParameters } from '../../domain/models/Models';
-import { buildInitCommand, buildInitPreset, buildProgramParams, buildEchoControl, buildColorScheme } from '../../utils/protocolBuilder';
+import { buildInitCommand, buildInitPreset, buildProgramParams, buildEchoControl, buildColorScheme, WorkoutParameters as ProtocolWorkoutParameters } from '../../utils/protocolBuilder';
 import { ColorScheme, COLOR_SCHEMES } from '../../utils/colorSchemes';
 
 /**
@@ -330,11 +330,28 @@ class BleRepositoryImpl extends EventEmitter implements IBleRepository {
       } else if (params.workoutType.type === 'program') {
         // Program mode: Send ONLY program params (web app: device.js line 283)
         console.log('[BleRepository] Program mode: sending ONLY program params (96 bytes)');
-        const programFrame = buildProgramParams(params);
+
+        // Convert domain WorkoutParameters to protocol WorkoutParameters
+        const protocolParams: ProtocolWorkoutParameters = {
+          workoutType: {
+            type: 'program',
+            mode: params.workoutType.mode.modeValue
+          },
+          reps: params.reps,
+          weightPerCableKg: params.weightPerCableKg || 0,
+          progressionRegressionKg: params.progressionRegressionKg || 0,
+          isJustLift: params.isJustLift || false,
+          useAutoStart: params.useAutoStart || false,
+          stopAtTop: params.stopAtTop || false,
+          warmupReps: params.warmupReps || 0,
+          selectedExerciseId: params.selectedExerciseId || undefined,
+        };
+
+        const programFrame = buildProgramParams(protocolParams);
         console.log(
-          `[BleRepository] Program params: Mode=${params.workoutType.mode}, ` +
-          `Weight=${params.weightPerCableKg}kg, Reps=${params.reps}, ` +
-          `JustLift=${params.isJustLift}, Progression=${params.progressionRegressionKg}kg`
+          `[BleRepository] Program params: Mode=${params.workoutType.mode.displayName}, ` +
+          `Weight=${params.weightPerCableKg || 0}kg, Reps=${params.reps}, ` +
+          `JustLift=${params.isJustLift}, Progression=${params.progressionRegressionKg || 0}kg`
         );
         await this.bleManager.sendCommand(programFrame);
         await this.delay(100);
@@ -459,6 +476,5 @@ export const resetBleRepository = (): void => {
   bleRepositoryInstance = null;
 };
 
-// Export types
-export type { IBleRepository };
+// Export implementation
 export { BleRepositoryImpl };

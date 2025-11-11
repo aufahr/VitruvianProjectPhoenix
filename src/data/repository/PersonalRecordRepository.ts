@@ -136,7 +136,7 @@ class PersonalRecordRepositoryImpl implements IPersonalRecordRepository {
    */
   private entityToPersonalRecord(entity: PersonalRecordEntity): PersonalRecord {
     return {
-      id: entity.id,
+      id: entity.id || 0,
       exerciseId: entity.exerciseId,
       weightPerCableKg: entity.weightPerCableKg,
       reps: entity.reps,
@@ -160,6 +160,5 @@ export const resetPersonalRecordRepository = (): void => {
   personalRecordRepositoryInstance = null;
 };
 
-// Export types
-export type { IPersonalRecordRepository };
+// Export implementation
 export { PersonalRecordRepositoryImpl };

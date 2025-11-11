@@ -14,12 +14,13 @@ import {
   RepEvent,
   HapticEvent,
   ProgramMode,
+  HandleState,
 } from '../../domain/models/Models';
 import { RepCounterFromMachine } from '../../domain/usecases/RepCounterFromMachine';
 import { useBleConnection } from './useBleConnection';
 import { insertSession, insertMetrics } from '../../data/local/daos/workoutDao';
 import { updatePRIfBetter } from '../../data/local/daos/personalRecordDao';
-import { WorkoutMetricEntity } from '../../data/local/entities';
+import { WorkoutMetricEntity, WorkoutSessionEntity } from '../../data/local/entities';
 
 interface AutoStopUiState {
   isActive: boolean;
@@ -391,8 +392,8 @@ export const useWorkoutSession = () => {
           ? Math.max(...store.collectedMetrics.map((m) => (m.loadA + m.loadB) / 2))
           : params.weightPerCableKg ?? 10;
 
-      const session: WorkoutSession = {
-        id: store.currentSessionId,
+      const sessionEntity: WorkoutSessionEntity = {
+        id: store.currentSessionId!,
         timestamp: store.workoutStartTime,
         mode: params.workoutType.type === 'program' ? params.workoutType.mode.displayName : 'Echo',
         reps: params.reps,
@@ -406,10 +407,10 @@ export const useWorkoutSession = () => {
         stopAtTop: params.stopAtTop ?? false,
         eccentricLoad: params.workoutType.type === 'echo' ? params.workoutType.eccentricLoad : 100,
         echoLevel: params.workoutType.type === 'echo' ? params.workoutType.level : 2,
-        exerciseId: params.selectedExerciseId,
+        exerciseId: params.selectedExerciseId ?? null,
       };
 
-      await insertSession(session);
+      await insertSession(sessionEntity);
 
       // Save metrics
       if (store.collectedMetrics.length > 0) {
@@ -431,7 +432,7 @@ export const useWorkoutSession = () => {
           params.selectedExerciseId,
           actualPerCableWeightKg,
           working,
-          session.mode ?? 'OldSchool',
+          sessionEntity.mode,
           Date.now()
         );
 

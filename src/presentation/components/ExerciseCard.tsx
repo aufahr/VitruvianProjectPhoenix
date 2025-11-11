@@ -59,7 +59,13 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   };
 
   return (
-    <Card onPress={onPress} style={[{marginBottom: spacing.small}, style]} testID={testID}>
+    <Card
+      onPress={onPress}
+      style={{
+        marginBottom: spacing.small,
+        ...style
+      }}
+      testID={testID}>
       <View
         style={{
           flexDirection: 'row',

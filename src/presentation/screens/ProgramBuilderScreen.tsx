@@ -177,7 +177,7 @@ export const ProgramBuilderScreen: React.FC = () => {
           <Input
             value={programName}
             onChangeText={setProgramName}
-            style={styles.headerInput}
+            inputStyle={styles.headerInput}
             containerStyle={{ marginBottom: 0 }}
             autoFocus
           />

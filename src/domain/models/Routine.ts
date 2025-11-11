@@ -1,5 +1,8 @@
-import { CableConfiguration, Exercise } from './Exercise';
+import { CableConfiguration, Exercise, resolveDefaultCableConfig } from './Exercise';
 import { WorkoutType, EccentricLoad, EchoLevel, ProgramMode } from './Models';
+
+// Re-export for backwards compatibility
+export { resolveDefaultCableConfig };
 
 /**
  * Domain model for a workout routine
@@ -57,15 +60,6 @@ export const getRoutineExerciseSets = (routineExercise: RoutineExercise): number
  */
 export const getRoutineExerciseReps = (routineExercise: RoutineExercise): number => {
   return routineExercise.setReps?.[0] ?? 10;
-};
-
-/**
- * Helper function to determine the appropriate cable configuration for an exercise
- * If exercise allows EITHER, defaults to DOUBLE
- */
-export const resolveDefaultCableConfig = (exercise: Exercise): CableConfiguration => {
-  const defaultConfig = exercise.defaultCableConfig ?? CableConfiguration.DOUBLE;
-  return defaultConfig === CableConfiguration.EITHER ? CableConfiguration.DOUBLE : defaultConfig;
 };
 
 /**

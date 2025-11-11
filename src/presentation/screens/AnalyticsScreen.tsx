@@ -885,6 +885,7 @@ const TrendsTab: React.FC<TrendsTabProps> = ({
                 marginVertical: spacing.small,
                 borderRadius: 16,
               }}
+              yAxisLabel=""
               yAxisSuffix="t"
             />
           </View>
@@ -924,6 +925,7 @@ const TrendsTab: React.FC<TrendsTabProps> = ({
                 marginVertical: spacing.small,
                 borderRadius: 16,
               }}
+              yAxisLabel=""
               yAxisSuffix=""
               showValuesOnTopOfBars
             />

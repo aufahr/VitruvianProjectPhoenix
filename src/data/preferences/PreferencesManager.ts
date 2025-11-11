@@ -233,6 +233,5 @@ export const resetPreferencesManager = (): void => {
   preferencesManagerInstance = null;
 };
 
-// Export types
-export type { IPreferencesManager };
+// Export implementation
 export { PreferencesManagerImpl };
