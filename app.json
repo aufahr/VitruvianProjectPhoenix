@@ -1,6 +1,4 @@
 {
-  "name": "VitruvianPhoenix",
-  "displayName": "Vitruvian Phoenix",
   "expo": {
     "name": "Vitruvian Phoenix",
     "slug": "vitruvian-phoenix",
@@ -81,7 +79,7 @@
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "13.0"
+            "deploymentTarget": "15.1"
           },
           "android": {
             "compileSdkVersion": 34,
