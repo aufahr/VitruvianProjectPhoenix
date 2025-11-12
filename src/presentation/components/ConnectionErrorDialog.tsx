@@ -1,7 +1,7 @@
 /**
  * ConnectionErrorDialog Component
  * Error dialog shown when auto-connect fails
- * Migrated from Android Compose ConnectionErrorDialog
+ * Reusable React Native component
  */
 
 import React from 'react';

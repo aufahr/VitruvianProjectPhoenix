@@ -1,7 +1,6 @@
 /**
  * Card Component
- * A reusable card container with elevation and border support
- * Migrated from Android Compose Card component
+ * Reusable React Native card container with elevation and border support
  */
 
 import React from 'react';
@@ -26,10 +25,6 @@ export interface CardProps {
   testID?: string;
 }
 
-/**
- * Card component with Material Design 3 styling
- * Supports elevation, borders, and press interactions
- */
 export const Card: React.FC<CardProps> = ({
   children,
   onPress,

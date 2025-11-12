@@ -1,7 +1,7 @@
 /**
  * RestTimer Component
  * Displays during rest periods between sets/exercises in autoplay mode
- * Migrated from Android Compose RestTimerCard
+ * Reusable React Native component
  */
 
 import React, {useRef, useEffect} from 'react';

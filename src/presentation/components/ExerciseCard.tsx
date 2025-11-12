@@ -1,7 +1,7 @@
 /**
  * ExerciseCard Component
  * Displays exercise information in a card format
- * Migrated from Android Compose exercise list items
+ * Reusable React Native component
  */
 
 import React from 'react';
