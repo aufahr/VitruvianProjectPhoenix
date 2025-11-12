@@ -1,7 +1,7 @@
 /**
  * Button Component
- * Custom button variants matching Material Design 3
- * Migrated from Android Compose Button components
+ * Reusable React Native button with multiple variants and sizes
+ * Supports icons, loading states, and accessibility
  */
 
 import React from 'react';
@@ -32,10 +32,6 @@ export interface ButtonProps {
   testID?: string;
 }
 
-/**
- * Button component with multiple variants and sizes
- * Supports icons, loading states, and accessibility
- */
 export const Button: React.FC<ButtonProps> = ({
   children,
   onPress,

@@ -1,7 +1,7 @@
 /**
  * LoadingSpinner Component
  * Displays a loading indicator with optional text
- * Migrated from Android Compose CircularProgressIndicator
+ * Reusable React Native component
  */
 
 import React from 'react';

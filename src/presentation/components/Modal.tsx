@@ -1,7 +1,7 @@
 /**
  * Modal Component
  * A reusable modal wrapper with consistent styling
- * Migrated from Android Compose Dialog/ModalBottomSheet
+ * Reusable React Native component
  */
 
 import React from 'react';

@@ -1,7 +1,7 @@
 /**
  * ConnectionStatusBanner Component
  * Displays when not connected to the Vitruvian Trainer
- * Migrated from Android Compose ConnectionStatusBanner
+ * Reusable React Native component
  */
 
 import React from 'react';

@@ -1,7 +1,7 @@
 /**
  * ConnectingOverlay Component
  * Full-screen overlay showing "Connecting..." with animation
- * Migrated from Android Compose ConnectingOverlay
+ * Reusable React Native component
  */
 
 import React from 'react';

@@ -1,7 +1,7 @@
 /**
  * CountdownTimer Component
  * Displays a countdown before workout starts
- * Migrated from Android Compose CountdownCard
+ * Reusable React Native component
  */
 
 import React, {useEffect, useRef} from 'react';

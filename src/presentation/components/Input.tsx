@@ -1,7 +1,6 @@
 /**
  * Input Component
- * Custom text input with Material Design 3 styling
- * Migrated from Android Compose TextField/OutlinedTextField
+ * Reusable React Native text input with label, error states, and icons
  */
 
 import React, {useState} from 'react';
@@ -27,10 +26,6 @@ export interface InputProps extends Omit<RNTextInputProps, 'style'> {
   inputStyle?: TextStyle;
 }
 
-/**
- * Input component with label, error states, and icons
- * Supports outlined and filled variants
- */
 export const Input: React.FC<InputProps> = ({
   label,
   error,

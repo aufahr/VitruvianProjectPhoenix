@@ -1,7 +1,7 @@
 /**
  * StatsCard Component
  * Compact stats card displaying icon, value, and label
- * Migrated from Android Compose StatsCard
+ * Reusable React Native component
  */
 
 import React from 'react';

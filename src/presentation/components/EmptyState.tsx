@@ -1,7 +1,6 @@
 /**
  * EmptyState Component
- * Displays when lists/screens have no data
- * Migrated from Android Compose EmptyState
+ * Reusable React Native component for displaying empty states
  */
 
 import React from 'react';
@@ -19,10 +18,6 @@ export interface EmptyStateProps {
   testID?: string;
 }
 
-/**
- * Reusable empty state component for displaying when lists/screens have no data
- * Follows Material Design 3 principles and uses theme colors for consistent styling
- */
 export const EmptyState: React.FC<EmptyStateProps> = ({
   icon = '🏋️',
   title,

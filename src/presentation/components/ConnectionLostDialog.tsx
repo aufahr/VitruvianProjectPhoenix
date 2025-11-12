@@ -1,7 +1,7 @@
 /**
  * ConnectionLostDialog Component
  * Critical alert dialog shown when BLE connection is lost during an active workout
- * Migrated from Android Compose ConnectionLostDialog
+ * Reusable React Native component
  */
 
 import React from 'react';

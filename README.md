@@ -1,6 +1,6 @@
-# Vitruvian Phoenix - Expo App
+# Vitruvian Phoenix
 
-A professional iOS and Android workout tracking application for Vitruvian fitness equipment, built with **Expo** and React Native.
+A professional iOS and Android workout tracking application for Vitruvian fitness equipment, built with **Expo** and **React Native**.
 
 ## Overview
 
@@ -8,15 +8,15 @@ Connect to Vitruvian workout machines via Bluetooth LE for real-time workout mon
 
 ### Key Features
 
-- **🔵 BLE Device Control** - Connect to Vitruvian machines wirelessly
-- **💪 Multiple Workout Modes** - Old School, Pump, TUT, TUT Beast, Eccentric, Echo
-- **📊 Real-time Metrics** - Live load, position, velocity, and rep counting
-- **⚡ Just Lift Mode** - Quick workouts with auto-start/stop
-- **📚 Exercise Library** - 200+ exercises with filtering
-- **📋 Routine Management** - Custom routines and weekly programs
-- **🏆 Personal Records** - Automatic PR tracking
-- **📈 Analytics** - History, trends, and charts
-- **🌓 Dark/Light Themes** - Full Material Design 3
+- **Bluetooth LE Device Control** - Connect to Vitruvian machines wirelessly
+- **Multiple Workout Modes** - Old School, Pump, TUT, TUT Beast, Eccentric, Echo
+- **Real-time Metrics** - Live load, position, velocity, and rep counting
+- **Just Lift Mode** - Quick workouts with auto-start/stop
+- **Exercise Library** - 200+ exercises with filtering
+- **Routine Management** - Custom routines and weekly programs
+- **Personal Records** - Automatic PR tracking
+- **Analytics** - History, trends, and charts
+- **Dark/Light Themes** - Full theme system
 
 ## Quick Start
 
@@ -36,11 +36,10 @@ npm install
 npm start
 ```
 
-This will open Expo DevTools in your browser. Choose how to run:
-
+This will open Expo DevTools in your browser:
 - Press **`i`** for iOS Simulator (Mac only)
 - Press **`a`** for Android Emulator
-- Scan QR code with **Expo Go** app on your device (for quick preview)
+- Scan QR code with **Expo Go** app (for quick preview)
 - Press **`w`** for web preview
 
 ### Development Builds (Recommended for BLE)
@@ -48,22 +47,18 @@ This will open Expo DevTools in your browser. Choose how to run:
 For full BLE functionality, create a development build:
 
 ```bash
-# Install EAS CLI globally (one time only)
+# Install EAS CLI globally (one time)
 npm install -g eas-cli
 
 # Login to Expo
 eas login
 
-# Create development build for iOS
+# Create development build
 eas build --profile development --platform ios
-
 # Or for Android
 eas build --profile development --platform android
-```
 
-Once built, install the development build on your device and run:
-
-```bash
+# Then start with dev client
 npm start --dev-client
 ```
 
@@ -93,7 +88,7 @@ vitruvian-phoenix/
 │   │   └── theme/       # Theme system
 │   ├── utils/           # Utilities
 │   └── types/           # TypeScript definitions
-└── expo-setup.sh        # Automated setup script
+└── deprecated/          # Archived Android code
 ```
 
 ## Scripts
@@ -105,85 +100,62 @@ npm run android    # Run on Android Emulator
 npm run web        # Run on web browser
 npm run lint       # Lint code
 npm test           # Run tests
-npm run prebuild   # Generate native projects (ios/, android/)
+npm run prebuild   # Generate native projects
 ```
 
 ## Tech Stack
 
 - **Framework**: Expo SDK 52
 - **Language**: TypeScript 5.0
-- **UI**: React Native + Custom Material Design 3 components
+- **UI**: React Native with custom reusable components
 - **State**: Zustand + React Hooks
 - **Navigation**: React Navigation (Stack + Bottom Tabs)
 - **Database**: SQLite (react-native-sqlite-storage)
 - **BLE**: react-native-ble-plx
 - **Charts**: react-native-chart-kit
-- **Theme**: Custom Material Design 3 system
 
-## Configuration
+## Architecture
 
-### Expo Configuration (app.json)
+Follows **Clean Architecture** principles:
 
-The app is pre-configured with:
-- ✅ BLE permissions (iOS & Android)
-- ✅ Background Bluetooth modes
-- ✅ Deep linking (`vitruvianphoenix://`)
-- ✅ iOS bundle ID: `com.vitruvianphoenix.app`
-- ✅ Android package: `com.vitruvianphoenix.app`
-
-### EAS Build Profiles (eas.json)
-
-- **development** - For local testing with dev client
-- **preview** - For internal testing (APK/IPA)
-- **production** - For App Store/Play Store
-
-## Development Workflow
-
-### 1. Quick UI Testing (Expo Go)
-
-For rapid UI iteration without native dependencies:
-
-```bash
-npm start
-# Scan QR code with Expo Go app
+```
+┌─────────────────┐
+│  Presentation   │ ← React Native UI, Hooks, Navigation
+├─────────────────┤
+│     Domain      │ ← Business Logic, Models, Use Cases
+├─────────────────┤
+│      Data       │ ← BLE, Database, Repositories
+└─────────────────┘
 ```
 
-**Note**: BLE features won't work in Expo Go. Use development build instead.
+### Data Layer
+- **BLE Manager**: Handles Bluetooth connectivity, device scanning, and characteristics
+- **Database**: SQLite with 10 tables for workouts, exercises, routines, PRs
+- **Repositories**: Abstract data sources, provide business-friendly APIs
 
-### 2. Full Feature Development (Development Build)
+### Domain Layer
+- **Models**: Pure business entities (no platform dependencies)
+- **Use Cases**: Business logic (e.g., RepCounterFromMachine)
 
-For testing all features including BLE:
+### Presentation Layer
+- **Screens**: Full-screen React Native components
+- **Components**: Reusable UI elements
+- **Hooks**: State management and side effects
+- **Navigation**: React Navigation setup
+- **Theme**: Custom theming system
 
-```bash
-# First time only
-eas build --profile development --platform ios
-
-# Then for development
-npm start --dev-client
-```
-
-### 3. Building for Production
-
-```bash
-# iOS (App Store)
-eas build --profile production --platform ios
-
-# Android (Play Store)
-eas build --profile production --platform android
-```
-
-## Features
+## Key Features
 
 ### Workout Modes
 
 1. **Old School** - Classic resistance training
 2. **Pump** - High volume, lighter weight
-3. **TUT (Time Under Tension)** - Controlled tempo
+3. **TUT** - Controlled tempo
 4. **TUT Beast** - Extended TUT with progressive overload
-5. **Eccentric Only** - Negative-focused training
+5. **Eccentric** - Negative-focused training
 6. **Echo** - Reactive training with variable resistance
 
-### Screen Overview
+### Screens
 
 - **HomeScreen** - Workout mode selection
 - **JustLiftScreen** - Quick single-exercise workouts
@@ -220,112 +192,88 @@ Communicates with Vitruvian machines via:
 
 ## Troubleshooting
 
-### "Metro Bundler not found"
-
+### Metro Bundler Issues
 ```bash
-# Clear Metro cache
 npm start -- --reset-cache
 ```
 
-### "Unable to resolve module"
-
+### Module Resolution Issues
 ```bash
-# Reinstall dependencies
 rm -rf node_modules
 npm install
 ```
 
-### BLE not working
-
-1. Ensure you're using a **development build**, not Expo Go
+### BLE Not Working
+1. Use a **development build**, not Expo Go
 2. Check Bluetooth permissions are granted
 3. Verify device name starts with "Vee"
 4. Check Connection Logs in Settings
 
-### Build fails
-
+### Build Fails
 ```bash
-# Clear Expo cache
 npx expo prebuild --clean
 npm install
 ```
 
-## Testing
+## Configuration
 
-```bash
-# Run tests
-npm test
+### Expo (app.json)
+Pre-configured with:
+- BLE permissions (iOS & Android)
+- Background Bluetooth modes
+- Deep linking (`vitruvianphoenix://`)
+- iOS bundle ID: `com.vitruvianphoenix.app`
+- Android package: `com.vitruvianphoenix.app`
 
-# Type check
-npx tsc --noEmit
+### EAS Build (eas.json)
+- **development** - For local testing with dev client
+- **preview** - For internal testing (APK/IPA)
+- **production** - For App Store/Play Store
 
-# Lint
-npm run lint
-```
-
-## Documentation
-
-- **EXPO_SETUP.md** - Detailed Expo setup guide
-- **MIGRATION_REVIEW.md** - Migration details and analysis
-- **BLE_MIGRATION_SUMMARY.md** - BLE layer documentation
-- **Navigation docs** - 5 comprehensive navigation guides
-- **assets/README.md** - Asset requirements
-
-## Architecture
-
-Follows **Clean Architecture** principles:
-
-```
-┌─────────────────┐
-│  Presentation   │ ← React Native UI, Hooks, Navigation
-├─────────────────┤
-│     Domain      │ ← Business Logic, Models, Use Cases
-├─────────────────┤
-│      Data       │ ← BLE, Database, Repositories
-└─────────────────┘
-```
-
-- **Separation of concerns** - Clear boundaries between layers
-- **Dependency inversion** - Dependencies point inward
-- **Testability** - Each layer can be tested independently
-- **Type safety** - Full TypeScript coverage
-
-## Contributing
-
-This app was fully migrated from native Android Kotlin to Expo React Native.
-
-**Migration Stats:**
-- 74 Kotlin files → 100+ TypeScript files
-- 15,000+ lines of code
-- 100% feature parity
-- 0 TypeScript errors ✅
-
-## Deployment
+## Building for Production
 
 ### iOS
-
 ```bash
-# Submit to App Store
 eas build --profile production --platform ios
 eas submit --platform ios
 ```
 
 ### Android
-
 ```bash
-# Submit to Play Store
 eas build --profile production --platform android
 eas submit --platform android
 ```
 
 ### OTA Updates
-
-Expo supports over-the-air updates for quick bug fixes:
-
 ```bash
-# Publish update
 eas update --branch production --message "Fix bug"
 ```
+
+## Migration History
+
+This app was fully migrated from native Android Kotlin/Jetpack Compose to Expo React Native:
+- 74 Kotlin files → 100+ TypeScript files
+- 15,000+ lines of code
+- 100% feature parity
+- 0 TypeScript errors
+
+All Android code has been archived to `deprecated/` folder.
+
+## Testing
+
+```bash
+npm test           # Run tests
+npx tsc --noEmit   # Type check
+npm run lint       # Lint code
+```
+
+## Documentation
+
+See `docs/` folder for additional documentation:
+- Development guides
+- BLE protocol details
+- Database schema documentation
+- Navigation architecture
 
 ## Support
 
@@ -341,6 +289,4 @@ Proprietary - All rights reserved
 
 **Version**: 0.3.0
 **Platform**: iOS + Android (Expo)
-**Last Updated**: 2025-11-11
-
-Built with ❤️ using Expo
+**Last Updated**: 2025-11-12

@@ -1,7 +1,7 @@
 /**
  * RoutineCard Component
  * Displays workout routine information with exercises
- * Migrated from Android Compose RoutineCard
+ * Reusable React Native component
  */
 
 import React, {useState, useRef, useEffect} from 'react';
